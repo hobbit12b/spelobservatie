@@ -1,0 +1,797 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spelobservaties groep 1 2</title>
+  <meta name="theme-color" content="#111827" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111827;
+      --muted:#9ca3af;
+      --text:#f9fafb;
+      --accent:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --line:#1f2937;
+      --btn:#0f172a;
+      --btn2:#111827;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 20% 0%, #111827 0%, var(--bg) 55%, #050a14 100%);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif;
+      line-height:1.35;
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:18px 14px 80px}
+    header{
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+      margin:8px 0 14px;
+    }
+    h1{font-size:18px; margin:0 0 4px}
+    .sub{color:var(--muted); font-size:13px}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      margin:12px 0;
+    }
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .row > *{flex:1}
+    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+    select, textarea, input[type="text"]{
+      width:100%;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      border-radius: 14px;
+      padding:12px 12px;
+      font-size:16px;
+      outline:none;
+    }
+    textarea{min-height:86px; resize:vertical}
+    .btnbar{display:flex; gap:10px; flex-wrap:wrap}
+    button{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      padding:12px 12px;
+      border-radius: 14px;
+      font-size:15px;
+      cursor:pointer;
+      min-height:44px;
+    }
+    button:active{transform: translateY(1px)}
+    .primary{background: rgba(34,197,94,.16); border-color: rgba(34,197,94,.35)}
+    .ghost{background: transparent}
+    .danger{background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.35)}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      user-select:none;
+      min-height:44px;
+    }
+    .pill.on{border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.12)}
+    .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+    @media (max-width:520px){ .grid2{grid-template-columns:1fr} }
+    .q{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding:12px;
+      margin:10px 0;
+      background: rgba(255,255,255,.02);
+    }
+    .qtitle{font-size:15px; margin:0 0 10px}
+    .opt{display:flex; gap:8px; flex-wrap:wrap}
+    .opt button{
+      flex:1;
+      min-width: 120px;
+      background: rgba(255,255,255,.03);
+    }
+    .opt button.on{
+      border-color: rgba(34,197,94,.55);
+      background: rgba(34,197,94,.14);
+    }
+    .small{font-size:12px; color:var(--muted)}
+    .topnav{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .toast{
+      position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+      background: rgba(17,24,39,.92);
+      border:1px solid rgba(255,255,255,.10);
+      padding:10px 12px; border-radius: 14px;
+      color:var(--text); box-shadow: var(--shadow);
+      display:none;
+      max-width: 92vw;
+      font-size:14px;
+    }
+    .hr{height:1px; background: rgba(255,255,255,.08); margin:12px 0}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .tag{display:inline-block; font-size:12px; color:var(--muted); margin-left:8px}
+    .session{
+      padding:10px 0;
+      border-top:1px solid rgba(255,255,255,.07);
+    }
+    .session:first-child{border-top:0}
+    .session h4{margin:0 0 6px; font-size:14px}
+    .session p{margin:0; color:var(--muted); font-size:13px}
+    .footerActions{display:flex; gap:10px; flex-wrap:wrap}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Spelobservaties groep 1 2</h1>
+        <div class="sub">Supersnel invullen, later aanvullen, tekst voor het rapport met één knop, alles blijft op je telefoon</div>
+      </div>
+      <div class="topnav">
+        <button class="ghost" id="btnOverview">Overzicht</button>
+        <button class="ghost" id="btnExport">Export</button>
+        <button class="ghost" id="btnImport">Import</button>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Leerling</label>
+          <select id="studentSelect"></select>
+          <div class="small" id="studentHint"></div>
+        </div>
+        <div>
+          <label>Actie</label>
+          <div class="btnbar">
+            <button class="primary" id="btnNew">Nieuwe observatie</button>
+            <button id="btnReport">Maak rapporttekst</button>
+          </div>
+          <div class="small">Tip, maak meerdere korte sessies per leerling, dan wordt de rapporttekst sterker en eerlijker</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="placeCard" style="display:none;">
+      <label>Waar speelt of werkt de leerling nu</label>
+      <div class="grid2" id="placeButtons"></div>
+      <div class="small">Kies een plek, daarna verschijnen korte vragen</div>
+    </div>
+
+    <div class="card" id="questionsCard" style="display:none;">
+      <div class="row" style="align-items:center;">
+        <div>
+          <div class="small">Leerling</div>
+          <div id="whoNow" style="font-size:16px; font-weight:600;"></div>
+        </div>
+        <div style="text-align:right;">
+          <div class="small">Plek</div>
+          <div id="placeNow" style="font-size:16px; font-weight:600;"></div>
+        </div>
+      </div>
+      <div class="hr"></div>
+
+      <div id="questions"></div>
+
+      <div class="hr"></div>
+      <label>Eigen notitie (optioneel)</label>
+      <textarea id="freeNote" placeholder="Typ hier jouw eigen observatie, in je eigen woorden"></textarea>
+
+      <div class="hr"></div>
+      <div class="footerActions">
+        <button class="primary" id="btnSave">Opslaan</button>
+        <button id="btnCancel">Annuleren</button>
+      </div>
+      <div class="small">Alles wordt opgeslagen met datum en tijd, je kunt later verder aanvullen</div>
+    </div>
+
+    <div class="card" id="reportCard" style="display:none;">
+      <div class="row" style="align-items:flex-start;">
+        <div>
+          <div class="small">Rapporttekst voor ouders</div>
+          <div style="font-size:16px; font-weight:700;" id="reportTitle"></div>
+        </div>
+        <div style="text-align:right;">
+          <button class="primary" id="btnCopy">Kopieer tekst</button>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div id="reportText" style="white-space:pre-wrap; font-size:15px;"></div>
+      <div class="hr"></div>
+      <div class="small">Je kunt de tekst altijd aanpassen. De toon is bewust positief en voorzichtig als er weinig observaties zijn.</div>
+    </div>
+
+    <div class="card" id="overviewCard" style="display:none;">
+      <div class="row" style="align-items:center;">
+        <div>
+          <div style="font-size:16px; font-weight:700;">Overzicht observaties</div>
+          <div class="small" id="overviewSub"></div>
+        </div>
+        <div style="text-align:right;">
+          <button class="danger" id="btnDeleteStudent">Verwijder data van leerling</button>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div id="sessions"></div>
+    </div>
+
+    <input type="file" id="importFile" accept="application/json" style="display:none;" />
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const STUDENTS = [
+    "ilsa","maria","senior","lisemarijn","zoëy","sammy","juliuscesar","danior","bodelijn","luukas",
+    "samueg","juliana","lotty","milous","emilia","emmaheesters","jayke","lucas","meester","veranda","joëllaria"
+  ];
+
+  const PLACES = [
+    { id:"woonhoek", label:"Woonhoek" },
+    { id:"buiten", label:"Buiten" },
+    { id:"bouwhoek", label:"Bouwhoek" },
+    { id:"constructie", label:"Constructiemateriaal" },
+    { id:"werkjes", label:"Werkjes uit de kast" }
+  ];
+
+  const SCALE = ["ja","soms","nog niet","weet ik niet"];
+
+  const BASE_QUESTIONS = [
+    { id:"start", text:"Start zelfstandig met spel of werk" , type:"scale", dim:"initiatief" },
+    { id:"volhouden", text:"Blijft even bij hetzelfde spel of werk" , type:"scale", dim:"volhouden" },
+    { id:"samen", text:"Speelt of werkt samen met anderen" , type:"scale", dim:"samenspel" },
+    { id:"taal", text:"Gebruikt taal om het spel of werk te sturen" , type:"scale", dim:"taal" },
+    { id:"afspraken", text:"Houdt zich aan afspraken, delen, wachten, opruimen" , type:"scale", dim:"afspraken" }
+  ];
+
+  const PLACE_QUESTIONS = {
+    woonhoek: [
+      { id:"rol", text:"Speelt een rol, bijvoorbeeld ouder, dokter, winkel" , type:"scale", dim:"rollenspel" },
+      { id:"rollenAfspraken", text:"Maakt afspraken over rollen en houdt die vol" , type:"scale", dim:"rollenspel" }
+    ],
+    buiten: [
+      { id:"spelregelsBuiten", text:"Doet mee met spelregels buiten, tikspel, balspel" , type:"scale", dim:"spelregels" },
+      { id:"sociaalBuiten", text:"Zoekt contact, nodigt uit, reageert passend" , type:"scale", dim:"samenspel" }
+    ],
+    bouwhoek: [
+      { id:"bouwenPlan", text:"Bouwt met een idee, plan of bedoeling" , type:"scale", dim:"bouwen" },
+      { id:"bouwenDoorzetten", text:"Probeert opnieuw als iets instort of niet lukt" , type:"scale", dim:"doorzetten" }
+    ],
+    constructie: [
+      { id:"constructieCreatief", text:"Combineert materialen creatief" , type:"scale", dim:"creativiteit" },
+      { id:"constructieOplossen", text:"Zoekt oplossingen bij problemen" , type:"scale", dim:"probleemoplossing" }
+    ],
+    werkjes: [
+      { id:"werkZelfstandig", text:"Pakt een werkje en gaat zelfstandig aan de slag" , type:"scale", dim:"zelfstandig" },
+      { id:"focus", text:"Blijft met aandacht bij de taak" , type:"scale", dim:"focus" },
+      { id:"afgeleid", text:"Is snel afgeleid tijdens het werk" , type:"scale", dim:"afleiding" },
+      { id:"rondlopen", text:"Gaat rondlopen tijdens het werk" , type:"scale", dim:"afleiding" },
+      { id:"kletsen", text:"Gaat kletsen tijdens het werk" , type:"scale", dim:"afleiding" },
+      { id:"waardoor", text:"Waardoor raakt de leerling afgeleid" , type:"multi", options:[
+        "klasgenoten","geluid in de klas","materiaal op tafel","eigen ideeën","vermoeidheid","onduidelijkheid over de taak"
+      ], dim:"afleiding" }
+    ]
+  };
+
+  const STORAGE_KEY = "spelObservatiesV1";
+  const $ = (id) => document.getElementById(id);
+
+  function nowISO(){
+    return new Date().toISOString();
+  }
+
+  function fmtDate(iso){
+    const d = new Date(iso);
+    return d.toLocaleString("nl-NL", { dateStyle:"medium", timeStyle:"short" });
+  }
+
+  function titleCase(name){
+    if(!name) return "";
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  function toast(msg){
+    const el = $("toast");
+    el.textContent = msg;
+    el.style.display = "block";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=> el.style.display="none", 2200);
+  }
+
+  function load(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      try{ return JSON.parse(raw); }catch(e){}
+    }
+    const fresh = { version:1, students:{} };
+    for(const s of STUDENTS){
+      fresh.students[s] = { sessions:[] };
+    }
+    save(fresh);
+    return fresh;
+  }
+
+  function save(data){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  let data = load();
+  let currentStudent = STUDENTS[0];
+  let currentPlace = null;
+  let draftAnswers = {};
+  let draftMulti = {};
+  let draftNote = "";
+
+  function ensureStudent(name){
+    if(!data.students[name]) data.students[name] = { sessions:[] };
+  }
+
+  function studentSessions(name){
+    ensureStudent(name);
+    return data.students[name].sessions || [];
+  }
+
+  function renderStudentSelect(){
+    const sel = $("studentSelect");
+    sel.innerHTML = "";
+    const names = Object.keys(data.students);
+    names.sort((a,b)=> a.localeCompare(b,"nl"));
+    for(const n of names){
+      const opt = document.createElement("option");
+      opt.value = n;
+      opt.textContent = titleCase(n);
+      sel.appendChild(opt);
+    }
+    sel.value = currentStudent;
+    $("studentHint").textContent = `${studentSessions(currentStudent).length} observaties opgeslagen`;
+  }
+
+  function renderPlaceButtons(){
+    const host = $("placeButtons");
+    host.innerHTML = "";
+    for(const p of PLACES){
+      const b = document.createElement("button");
+      b.className = "pill";
+      b.textContent = p.label;
+      b.onclick = ()=> startQuestions(p.id);
+      host.appendChild(b);
+    }
+  }
+
+  function allQuestionsForPlace(placeId){
+    const extra = PLACE_QUESTIONS[placeId] || [];
+    return [...BASE_QUESTIONS, ...extra];
+  }
+
+  function renderQuestions(placeId){
+    const qs = allQuestionsForPlace(placeId);
+    const host = $("questions");
+    host.innerHTML = "";
+
+    for(const q of qs){
+      const box = document.createElement("div");
+      box.className = "q";
+
+      const t = document.createElement("div");
+      t.className = "qtitle";
+      t.textContent = q.text;
+      box.appendChild(t);
+
+      if(q.type === "scale"){
+        const opt = document.createElement("div");
+        opt.className = "opt";
+        for(const o of SCALE){
+          const btn = document.createElement("button");
+          btn.textContent = o;
+          btn.className = (draftAnswers[q.id] === o) ? "on" : "";
+          btn.onclick = ()=>{
+            draftAnswers[q.id] = o;
+            renderQuestions(placeId);
+          };
+          opt.appendChild(btn);
+        }
+        box.appendChild(opt);
+      }
+
+      if(q.type === "multi"){
+        const opt = document.createElement("div");
+        opt.className = "opt";
+        draftMulti[q.id] = draftMulti[q.id] || [];
+        const selected = new Set(draftMulti[q.id]);
+
+        const btnUnknown = document.createElement("button");
+        btnUnknown.textContent = "weet ik niet";
+        btnUnknown.className = selected.has("weet ik niet") ? "on" : "";
+        btnUnknown.onclick = ()=>{
+          if(selected.has("weet ik niet")){
+            selected.delete("weet ik niet");
+          }else{
+            selected.clear();
+            selected.add("weet ik niet");
+          }
+          draftMulti[q.id] = [...selected];
+          renderQuestions(placeId);
+        };
+        opt.appendChild(btnUnknown);
+
+        for(const o of q.options){
+          const btn = document.createElement("button");
+          btn.textContent = o;
+          btn.className = selected.has(o) ? "on" : "";
+          btn.onclick = ()=>{
+            if(selected.has("weet ik niet")) selected.delete("weet ik niet");
+            if(selected.has(o)) selected.delete(o); else selected.add(o);
+            draftMulti[q.id] = [...selected];
+            renderQuestions(placeId);
+          };
+          opt.appendChild(btn);
+        }
+        box.appendChild(opt);
+
+        const extra = document.createElement("div");
+        extra.className = "small";
+        extra.textContent = "Je kunt meerdere opties kiezen";
+        box.appendChild(extra);
+      }
+
+      host.appendChild(box);
+    }
+  }
+
+  function startQuestions(placeId){
+    currentPlace = placeId;
+    draftAnswers = {};
+    draftMulti = {};
+    draftNote = "";
+    $("freeNote").value = "";
+    $("whoNow").textContent = titleCase(currentStudent);
+    const p = PLACES.find(x=>x.id===placeId);
+    $("placeNow").textContent = p ? p.label : placeId;
+
+    $("placeCard").style.display = "none";
+    $("questionsCard").style.display = "block";
+    $("reportCard").style.display = "none";
+    $("overviewCard").style.display = "none";
+
+    renderQuestions(placeId);
+  }
+
+  function showPlaces(){
+    $("placeCard").style.display = "block";
+    $("questionsCard").style.display = "none";
+    $("reportCard").style.display = "none";
+    $("overviewCard").style.display = "none";
+  }
+
+  function scoreOf(answer){
+    if(answer === "ja") return 2;
+    if(answer === "soms") return 1;
+    if(answer === "nog niet") return 0;
+    return null;
+  }
+
+  function avgScore(values){
+    const v = values.filter(x=>x !== null && x !== undefined);
+    if(!v.length) return null;
+    const sum = v.reduce((a,b)=>a+b,0);
+    return sum / v.length;
+  }
+
+  function phraseForAvg(avg, positive=true){
+    if(avg === null) return "is nog lastig in te schatten";
+    if(avg >= 1.6) return positive ? "laat vaak zien dat" : "komt weinig naar voren";
+    if(avg >= 0.9) return positive ? "laat geregeld zien dat" : "wisselt nog sterk";
+    if(avg >= 0.3) return positive ? "heeft soms steun nodig om" : "is nog in ontwikkeling";
+    return positive ? "heeft nog veel steun nodig om" : "is nog in ontwikkeling";
+  }
+
+  function mostSeenPlaces(sessions){
+    const count = {};
+    for(const s of sessions){
+      count[s.place] = (count[s.place]||0)+1;
+    }
+    const pairs = Object.entries(count).sort((a,b)=>b[1]-a[1]);
+    return pairs.slice(0,2).map(([id])=>{
+      const p = PLACES.find(x=>x.id===id);
+      return p ? p.label : id;
+    });
+  }
+
+  function buildReportText(name){
+    const sessions = studentSessions(name);
+    const last = sessions.slice(-6);
+    const total = sessions.length;
+
+    if(!total){
+      return `Er zijn nog geen observaties opgeslagen voor ${titleCase(name)}.`;
+    }
+
+    const dims = {
+      initiatief: [],
+      volhouden: [],
+      samenspel: [],
+      taal: [],
+      afspraken: [],
+      rollenspel: [],
+      spelregels: [],
+      bouwen: [],
+      doorzetten: [],
+      creativiteit: [],
+      probleemoplossing: [],
+      zelfstandig: [],
+      focus: [],
+      afleiding: []
+    };
+
+    const lastNotes = [];
+    for(const s of last){
+      const qs = allQuestionsForPlace(s.place);
+      for(const q of qs){
+        if(q.type === "scale"){
+          const sc = scoreOf(s.answers[q.id]);
+          if(q.dim && dims[q.dim]) dims[q.dim].push(sc);
+        }
+        if(q.id === "afgeleid" && q.type === "scale"){
+          const sc = scoreOf(s.answers[q.id]);
+          if(sc !== null) dims.afleiding.push(sc);
+        }
+      }
+      if(s.note && s.note.trim()) lastNotes.push(s.note.trim());
+    }
+
+    const aInit = avgScore(dims.initiatief);
+    const aVol = avgScore(dims.volhouden);
+    const aSamen = avgScore(dims.samenspel);
+    const aTaal = avgScore(dims.taal);
+    const aAfs = avgScore(dims.afspraken);
+    const aFocus = avgScore(dims.focus);
+    const aAfleiding = avgScore(dims.afleiding);
+
+    const places = mostSeenPlaces(last);
+    const placeLine = places.length
+      ? `${titleCase(name)} is de laatste periode vaak te zien bij ${places.join(" en ")}.`
+      : `${titleCase(name)} laat in het spel verschillende interesses zien.`;
+
+    const initLine = `${titleCase(name)} ${phraseForAvg(aInit)} zelfstandig start en keuzes maakt binnen spel en werk.`;
+    const volLine = `${titleCase(name)} ${phraseForAvg(aVol)} een spelidee of taak een tijdje volhoudt.`;
+    const samenLine = `${titleCase(name)} ${phraseForAvg(aSamen)} samen speelt en contact maakt met anderen.`;
+    const taalLine = `${titleCase(name)} ${phraseForAvg(aTaal)} taal gebruikt om mee te doen en het spel of werk vorm te geven.`;
+    const afsLine = `${titleCase(name)} ${phraseForAvg(aAfs)} afspraken volgt, zoals delen, wachten en opruimen.`;
+
+    let focusBlock = "";
+    const sawWork = last.some(s=>s.place === "werkjes");
+    if(sawWork){
+      const focusPhrase = phraseForAvg(aFocus);
+      let extra = "";
+      if(aAfleiding !== null){
+        if(aAfleiding >= 1.2) extra = "Afleiding lijkt dan minder op de voorgrond te staan.";
+        else if(aAfleiding >= 0.7) extra = "Soms is er afleiding, dan helpt het om de taak kort en duidelijk te houden.";
+        else extra = "Bij werkjes is afleiding nog zichtbaar, dan helpt een rustige plek en een helder stapje voor stapje plan.";
+      }
+      focusBlock = `${titleCase(name)} ${focusPhrase} met aandacht bij werkjes uit de kast blijft. ${extra}`.trim();
+    }
+
+    const growthCandidates = [
+      { key:"initiatief", avg:aInit, label:"zelfstandig starten en kiezen" },
+      { key:"volhouden", avg:aVol, label:"langer bij een spel of taak blijven" },
+      { key:"samenspel", avg:aSamen, label:"samen spelen en afstemmen" },
+      { key:"taal", avg:aTaal, label:"taal gebruiken in spel" },
+      { key:"afspraken", avg:aAfs, label:"afspraken volgen" },
+      { key:"focus", avg:aFocus, label:"focus houden bij een taak" }
+    ].filter(x=>x.avg !== null);
+
+    growthCandidates.sort((a,b)=>a.avg-b.avg);
+    const growth = growthCandidates[0];
+
+    const growthLine = growth
+      ? `Een volgende stap die nu mooi past: ${growth.label}, zodat spel en werk nog makkelijker doorlopen.`
+      : `Een volgende stap volgt vanzelf als er meer observaties zijn opgeslagen.`;
+
+    const noteLine = lastNotes.length
+      ? `Opvallend uit recente observaties: ${lastNotes.slice(-1)[0]}`
+      : "";
+
+    const lines = [
+      placeLine,
+      initLine,
+      volLine,
+      samenLine,
+      taalLine,
+      afsLine,
+      focusBlock,
+      noteLine,
+      growthLine
+    ].filter(Boolean);
+
+    return lines.join("\n\n");
+  }
+
+  function saveSession(){
+    const note = $("freeNote").value || "";
+    const placeId = currentPlace;
+    if(!placeId) return;
+
+    ensureStudent(currentStudent);
+
+    const session = {
+      at: nowISO(),
+      place: placeId,
+      answers: {...draftAnswers},
+      multi: {...draftMulti},
+      note: note
+    };
+
+    data.students[currentStudent].sessions.push(session);
+    save(data);
+
+    $("studentHint").textContent = `${studentSessions(currentStudent).length} observaties opgeslagen`;
+    toast("Opgeslagen");
+    showPlaces();
+  }
+
+  function showReport(){
+    const text = buildReportText(currentStudent);
+    $("reportTitle").textContent = titleCase(currentStudent);
+    $("reportText").textContent = text;
+
+    $("reportCard").style.display = "block";
+    $("placeCard").style.display = "none";
+    $("questionsCard").style.display = "none";
+    $("overviewCard").style.display = "none";
+  }
+
+  function showOverview(){
+    const sessions = studentSessions(currentStudent).slice().reverse();
+    $("overviewSub").textContent = `${titleCase(currentStudent)}, ${sessions.length} observaties`;
+    const host = $("sessions");
+    host.innerHTML = "";
+
+    if(!sessions.length){
+      host.innerHTML = `<div class="small">Nog geen observaties opgeslagen</div>`;
+    }else{
+      sessions.forEach((s, idx)=>{
+        const p = PLACES.find(x=>x.id===s.place);
+        const el = document.createElement("div");
+        el.className = "session";
+        const title = document.createElement("h4");
+        title.textContent = `${fmtDate(s.at)}, ${p ? p.label : s.place}`;
+        const info = document.createElement("p");
+
+        const known = Object.values(s.answers||{}).filter(x=>x && x !== "weet ik niet").length;
+        const unknown = Object.values(s.answers||{}).filter(x=>x === "weet ik niet").length;
+        const note = s.note && s.note.trim() ? `Notitie: ${s.note.trim()}` : "";
+        info.textContent = `${known} antwoorden, ${unknown} keer weet ik niet. ${note}`.trim();
+
+        const del = document.createElement("button");
+        del.className = "danger";
+        del.style.marginTop = "10px";
+        del.textContent = "Verwijder deze observatie";
+        del.onclick = ()=>{
+          const list = studentSessions(currentStudent);
+          const originalIndex = list.findIndex(x=>x.at===s.at && x.place===s.place);
+          if(originalIndex >= 0){
+            list.splice(originalIndex,1);
+            save(data);
+            toast("Observatie verwijderd");
+            showOverview();
+            renderStudentSelect();
+          }
+        };
+
+        el.appendChild(title);
+        el.appendChild(info);
+        el.appendChild(del);
+        host.appendChild(el);
+      });
+    }
+
+    $("overviewCard").style.display = "block";
+    $("reportCard").style.display = "none";
+    $("placeCard").style.display = "none";
+    $("questionsCard").style.display = "none";
+  }
+
+  function exportData(){
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `spelobservaties_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("Export gedownload");
+  }
+
+  function importData(file){
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const obj = JSON.parse(reader.result);
+        if(!obj || !obj.students) throw new Error("Geen geldige data");
+        data = obj;
+        save(data);
+        currentStudent = Object.keys(data.students)[0] || STUDENTS[0];
+        renderStudentSelect();
+        toast("Import gelukt");
+        showPlaces();
+      }catch(e){
+        toast("Import mislukt, controleer het bestand");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function deleteStudent(){
+    if(!confirm(`Weet je zeker dat je alle data van ${titleCase(currentStudent)} wilt verwijderen`)) return;
+    ensureStudent(currentStudent);
+    data.students[currentStudent].sessions = [];
+    save(data);
+    toast("Data verwijderd");
+    renderStudentSelect();
+    showOverview();
+  }
+
+  function init(){
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    }
+
+    renderPlaceButtons();
+    renderStudentSelect();
+    showPlaces();
+
+    $("studentSelect").addEventListener("change", (e)=>{
+      currentStudent = e.target.value;
+      renderStudentSelect();
+      $("reportCard").style.display = "none";
+      $("overviewCard").style.display = "none";
+      showPlaces();
+    });
+
+    $("btnNew").onclick = ()=> showPlaces();
+    $("btnCancel").onclick = ()=> showPlaces();
+    $("btnSave").onclick = ()=> saveSession();
+
+    $("btnReport").onclick = ()=> showReport();
+    $("btnCopy").onclick = async ()=>{
+      const txt = $("reportText").textContent;
+      try{
+        await navigator.clipboard.writeText(txt);
+        toast("Tekst gekopieerd");
+      }catch(e){
+        toast("Kopiëren lukt niet, selecteer en kopieer handmatig");
+      }
+    };
+
+    $("btnOverview").onclick = ()=> showOverview();
+    $("btnDeleteStudent").onclick = ()=> deleteStudent();
+
+    $("btnExport").onclick = ()=> exportData();
+    $("btnImport").onclick = ()=> $("importFile").click();
+    $("importFile").addEventListener("change", (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(f) importData(f);
+      e.target.value = "";
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
