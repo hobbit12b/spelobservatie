@@ -1,0 +1,8 @@
+{
+  "name": "Spelobservaties groep 1 2",
+  "short_name": "Spelobservaties",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#111827"
+}
