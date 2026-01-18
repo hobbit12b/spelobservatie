@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!doctype html>
 <html lang="nl">
 <head>
@@ -14,11 +13,7 @@
       --muted:#9ca3af;
       --text:#f9fafb;
       --accent:#22c55e;
-      --warn:#f59e0b;
       --danger:#ef4444;
-      --line:#1f2937;
-      --btn:#0f172a;
-      --btn2:#111827;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --radius: 18px;
     }
@@ -48,7 +43,7 @@
     .row{display:flex; gap:12px; flex-wrap:wrap}
     .row > *{flex:1}
     label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
-    select, textarea, input[type="text"]{
+    select, textarea{
       width:100%;
       background: rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.08);
@@ -74,17 +69,6 @@
     .primary{background: rgba(34,197,94,.16); border-color: rgba(34,197,94,.35)}
     .ghost{background: transparent}
     .danger{background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.35)}
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:10px 12px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
-      cursor:pointer;
-      user-select:none;
-      min-height:44px;
-    }
-    .pill.on{border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.12)}
     .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
     @media (max-width:520px){ .grid2{grid-template-columns:1fr} }
     .q{
@@ -120,8 +104,6 @@
       font-size:14px;
     }
     .hr{height:1px; background: rgba(255,255,255,.08); margin:12px 0}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
-    .tag{display:inline-block; font-size:12px; color:var(--muted); margin-left:8px}
     .session{
       padding:10px 0;
       border-top:1px solid rgba(255,255,255,.07);
@@ -137,7 +119,7 @@
     <header>
       <div>
         <h1>Spelobservaties groep 1 2</h1>
-        <div class="sub">Supersnel invullen, later aanvullen, tekst voor het rapport met één knop, alles blijft op je telefoon</div>
+        <div class="sub">Supersnel invullen, later aanvullen, rapporttekst met drie opties, alles blijft op je telefoon</div>
       </div>
       <div class="topnav">
         <button class="ghost" id="btnOverview">Overzicht</button>
@@ -159,7 +141,7 @@
             <button class="primary" id="btnNew">Nieuwe observatie</button>
             <button id="btnReport">Maak rapporttekst</button>
           </div>
-          <div class="small">Tip, maak meerdere korte sessies per leerling, dan wordt de rapporttekst sterker en eerlijker</div>
+          <div class="small">Tip: meerdere korte sessies per leerling maakt de tekst eerlijker en persoonlijker</div>
         </div>
       </div>
     </div>
@@ -210,7 +192,7 @@
       <div class="hr"></div>
       <div id="reportText" style="white-space:pre-wrap; font-size:15px;"></div>
       <div class="hr"></div>
-      <div class="small">Je kunt de tekst altijd aanpassen. De toon is bewust positief en voorzichtig als er weinig observaties zijn.</div>
+      <div class="small">Elke optie is maximaal 80 woorden en alleen gebaseerd op wat jij hebt ingevuld</div>
     </div>
 
     <div class="card" id="overviewCard" style="display:none;">
@@ -247,51 +229,54 @@
     { id:"werkjes", label:"Werkjes uit de kast" }
   ];
 
-  const SCALE = ["ja","soms","nog niet","weet ik niet"];
+  // Nieuwe antwoordopties: meestal en zelden
+  const SCALE = ["meestal","ja","soms","zelden","nog niet","weet ik niet"];
 
   const BASE_QUESTIONS = [
-    { id:"start", text:"Start zelfstandig met spel of werk" , type:"scale", dim:"initiatief" },
-    { id:"volhouden", text:"Blijft even bij hetzelfde spel of werk" , type:"scale", dim:"volhouden" },
-    { id:"samen", text:"Speelt of werkt samen met anderen" , type:"scale", dim:"samenspel" },
-    { id:"taal", text:"Gebruikt taal om het spel of werk te sturen" , type:"scale", dim:"taal" },
-    { id:"afspraken", text:"Houdt zich aan afspraken, delen, wachten, opruimen" , type:"scale", dim:"afspraken" }
+    { id:"start", text:"Start zelfstandig met spel of werk", type:"scale", dim:"initiatief" },
+    { id:"volhouden", text:"Blijft even bij hetzelfde spel of werk", type:"scale", dim:"volhouden" },
+    { id:"samen", text:"Speelt of werkt samen met anderen", type:"scale", dim:"samenspel" },
+    { id:"taal", text:"Gebruikt taal om het spel of werk te sturen", type:"scale", dim:"taal" },
+    { id:"afspraken", text:"Houdt zich aan afspraken, delen, wachten, opruimen", type:"scale", dim:"afspraken" }
   ];
 
   const PLACE_QUESTIONS = {
     woonhoek: [
-      { id:"rol", text:"Speelt een rol, bijvoorbeeld ouder, dokter, winkel" , type:"scale", dim:"rollenspel" },
-      { id:"rollenAfspraken", text:"Maakt afspraken over rollen en houdt die vol" , type:"scale", dim:"rollenspel" }
+      { id:"rol", text:"Speelt een rol, bijvoorbeeld ouder, dokter, winkel", type:"scale", dim:"rollenspel" },
+      { id:"rollenAfspraken", text:"Maakt afspraken over rollen en houdt die even vol", type:"scale", dim:"rollenspel" }
     ],
     buiten: [
-      { id:"spelregelsBuiten", text:"Doet mee met spelregels buiten, tikspel, balspel" , type:"scale", dim:"spelregels" },
-      { id:"sociaalBuiten", text:"Zoekt contact, nodigt uit, reageert passend" , type:"scale", dim:"samenspel" }
+      { id:"spelregelsBuiten", text:"Doet mee met spelregels buiten, tikspel, balspel", type:"scale", dim:"spelregels" },
+      { id:"sociaalBuiten", text:"Zoekt contact, nodigt uit, reageert passend", type:"scale", dim:"samenspel" }
     ],
     bouwhoek: [
-      { id:"bouwenPlan", text:"Bouwt met een idee, plan of bedoeling" , type:"scale", dim:"bouwen" },
-      { id:"bouwenDoorzetten", text:"Probeert opnieuw als iets instort of niet lukt" , type:"scale", dim:"doorzetten" }
+      { id:"bouwenPlan", text:"Bouwt met een idee of bedoeling", type:"scale", dim:"bouwen" },
+      { id:"bouwenDoorzetten", text:"Probeert opnieuw als iets instort of niet lukt", type:"scale", dim:"doorzetten" }
     ],
     constructie: [
-      { id:"constructieCreatief", text:"Combineert materialen creatief" , type:"scale", dim:"creativiteit" },
-      { id:"constructieOplossen", text:"Zoekt oplossingen bij problemen" , type:"scale", dim:"probleemoplossing" }
+      { id:"constructieCreatief", text:"Combineert materialen creatief", type:"scale", dim:"creativiteit" },
+      { id:"constructieOplossen", text:"Zoekt oplossingen bij problemen", type:"scale", dim:"probleemoplossing" }
     ],
     werkjes: [
-      { id:"werkZelfstandig", text:"Pakt een werkje en gaat zelfstandig aan de slag" , type:"scale", dim:"zelfstandig" },
-      { id:"focus", text:"Blijft met aandacht bij de taak" , type:"scale", dim:"focus" },
-      { id:"afgeleid", text:"Is snel afgeleid tijdens het werk" , type:"scale", dim:"afleiding" },
-      { id:"rondlopen", text:"Gaat rondlopen tijdens het werk" , type:"scale", dim:"afleiding" },
-      { id:"kletsen", text:"Gaat kletsen tijdens het werk" , type:"scale", dim:"afleiding" },
-      { id:"waardoor", text:"Waardoor raakt de leerling afgeleid" , type:"multi", options:[
+      { id:"werkZelfstandig", text:"Pakt een werkje en gaat zelfstandig aan de slag", type:"scale", dim:"zelfstandig" },
+      { id:"focus", text:"Blijft met aandacht bij de taak", type:"scale", dim:"focus" },
+      { id:"afgeleid", text:"Is snel afgeleid tijdens het werk", type:"scale", dim:"afleiding" },
+      { id:"rondlopen", text:"Gaat rondlopen tijdens het werk", type:"scale", dim:"afleiding" },
+      { id:"kletsen", text:"Gaat kletsen tijdens het werk", type:"scale", dim:"afleiding" },
+      { id:"waardoor", text:"Waardoor raakt de leerling afgeleid", type:"multi", options:[
         "klasgenoten","geluid in de klas","materiaal op tafel","eigen ideeën","vermoeidheid","onduidelijkheid over de taak"
-      ], dim:"afleiding" }
+      ], dim:"afleiding" },
+      // Nieuwe microvraag: wat helpt om weer te focussen
+      { id:"helptFocus", text:"Wat helpt om weer door te gaan", type:"multi", options:[
+        "rustige plek","samen starten","korte uitleg","stapje voor stapje","taak kleiner maken","timer of afgesproken tijd"
+      ], dim:"focus" }
     ]
   };
 
-  const STORAGE_KEY = "spelObservatiesV1";
+  const STORAGE_KEY = "spelObservatiesV2";
   const $ = (id) => document.getElementById(id);
 
-  function nowISO(){
-    return new Date().toISOString();
-  }
+  function nowISO(){ return new Date().toISOString(); }
 
   function fmtDate(iso){
     const d = new Date(iso);
@@ -316,7 +301,7 @@
     if(raw){
       try{ return JSON.parse(raw); }catch(e){}
     }
-    const fresh = { version:1, students:{} };
+    const fresh = { version:2, students:{} };
     for(const s of STUDENTS){
       fresh.students[s] = { sessions:[] };
     }
@@ -333,7 +318,6 @@
   let currentPlace = null;
   let draftAnswers = {};
   let draftMulti = {};
-  let draftNote = "";
 
   function ensureStudent(name){
     if(!data.students[name]) data.students[name] = { sessions:[] };
@@ -364,7 +348,6 @@
     host.innerHTML = "";
     for(const p of PLACES){
       const b = document.createElement("button");
-      b.className = "pill";
       b.textContent = p.label;
       b.onclick = ()=> startQuestions(p.id);
       host.appendChild(b);
@@ -455,8 +438,8 @@
     currentPlace = placeId;
     draftAnswers = {};
     draftMulti = {};
-    draftNote = "";
     $("freeNote").value = "";
+
     $("whoNow").textContent = titleCase(currentStudent);
     const p = PLACES.find(x=>x.id===placeId);
     $("placeNow").textContent = p ? p.label : placeId;
@@ -476,10 +459,13 @@
     $("overviewCard").style.display = "none";
   }
 
+  // Antwoord omzetting, hoger = sterker aanwezig
   function scoreOf(answer){
+    if(answer === "meestal") return 3;
     if(answer === "ja") return 2;
     if(answer === "soms") return 1;
-    if(answer === "nog niet") return 0;
+    if(answer === "zelden") return 0;
+    if(answer === "nog niet") return -1;
     return null;
   }
 
@@ -490,133 +476,215 @@
     return sum / v.length;
   }
 
-  function phraseForAvg(avg, positive=true){
-    if(avg === null) return "is nog lastig in te schatten";
-    if(avg >= 1.6) return positive ? "laat vaak zien dat" : "komt weinig naar voren";
-    if(avg >= 0.9) return positive ? "laat geregeld zien dat" : "wisselt nog sterk";
-    if(avg >= 0.3) return positive ? "heeft soms steun nodig om" : "is nog in ontwikkeling";
-    return positive ? "heeft nog veel steun nodig om" : "is nog in ontwikkeling";
+  function wordCount(t){
+    return (t || "").trim().split(/\s+/).filter(Boolean).length;
   }
 
-  function mostSeenPlaces(sessions){
+  function limitWords(t, maxWords = 80){
+    const words = (t || "").trim().split(/\s+/).filter(Boolean);
+    if(words.length <= maxWords) return t.trim();
+    return words.slice(0, maxWords).join(" ") + "...";
+  }
+
+  function pickTopPlaces(sessions){
     const count = {};
     for(const s of sessions){
-      count[s.place] = (count[s.place]||0)+1;
+      count[s.place] = (count[s.place] || 0) + 1;
     }
-    const pairs = Object.entries(count).sort((a,b)=>b[1]-a[1]);
-    return pairs.slice(0,2).map(([id])=>{
-      const p = PLACES.find(x=>x.id===id);
-      return p ? p.label : id;
-    });
+    return Object.entries(count)
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,2)
+      .map(([id])=>{
+        const p = PLACES.find(x=>x.id===id);
+        return p ? p.label : id;
+      });
   }
 
-  function buildReportText(name){
-    const sessions = studentSessions(name);
-    const last = sessions.slice(-6);
-    const total = sessions.length;
-
-    if(!total){
-      return `Er zijn nog geen observaties opgeslagen voor ${titleCase(name)}.`;
-    }
-
-    const dims = {
-      initiatief: [],
-      volhouden: [],
-      samenspel: [],
-      taal: [],
-      afspraken: [],
-      rollenspel: [],
-      spelregels: [],
-      bouwen: [],
-      doorzetten: [],
-      creativiteit: [],
-      probleemoplossing: [],
-      zelfstandig: [],
-      focus: [],
-      afleiding: []
-    };
-
-    const lastNotes = [];
-    for(const s of last){
+  function tallyForDim(sessions, dimKey){
+    const vals = [];
+    for(const s of sessions){
       const qs = allQuestionsForPlace(s.place);
       for(const q of qs){
-        if(q.type === "scale"){
-          const sc = scoreOf(s.answers[q.id]);
-          if(q.dim && dims[q.dim]) dims[q.dim].push(sc);
-        }
-        if(q.id === "afgeleid" && q.type === "scale"){
-          const sc = scoreOf(s.answers[q.id]);
-          if(sc !== null) dims.afleiding.push(sc);
-        }
+        if(q.type !== "scale") continue;
+        if(q.dim !== dimKey) continue;
+        const a = (s.answers || {})[q.id];
+        if(a) vals.push(a);
       }
-      if(s.note && s.note.trim()) lastNotes.push(s.note.trim());
+    }
+    const t = { meestal:0, ja:0, soms:0, zelden:0, "nog niet":0, "weet ik niet":0, total:0 };
+    for(const v of vals){
+      if(t[v] !== undefined) t[v] += 1;
+      t.total += 1;
+    }
+    return t;
+  }
+
+  function stance(tally){
+    if(!tally.total || (tally.meestal + tally.ja + tally.soms + tally.zelden + tally["nog niet"] === 0)) return "unknown";
+    const known = tally.meestal + tally.ja + tally.soms + tally.zelden + tally["nog niet"];
+    if(known <= 1) return "unknown";
+    if(tally.meestal >= 2) return "mostly";
+    if(tally.ja >= tally.soms && tally.ja >= tally.zelden && tally.ja >= tally["nog niet"]) return "often";
+    if(tally.soms >= tally.ja && tally.soms >= tally.zelden && tally.soms >= tally["nog niet"]) return "sometimes";
+    if(tally.zelden >= tally.soms && tally.zelden >= tally["nog niet"]) return "rarely";
+    return "notyet";
+  }
+
+  function buildPlaySentences(name, sessions){
+    const last = sessions.slice(-8);
+    const places = pickTopPlaces(last);
+
+    const init = stance(tallyForDim(last, "initiatief"));
+    const vol = stance(tallyForDim(last, "volhouden"));
+    const samen = stance(tallyForDim(last, "samenspel"));
+    const taal = stance(tallyForDim(last, "taal"));
+    const afs = stance(tallyForDim(last, "afspraken"));
+
+    const rol = stance(tallyForDim(last, "rollenspel"));
+    const bouw = stance(tallyForDim(last, "bouwen"));
+
+    const focus = stance(tallyForDim(last, "focus"));
+    const afleiding = stance(tallyForDim(last, "afleiding"));
+
+    const lastNote = [...last].reverse().find(s => s.note && s.note.trim());
+    const noteText = lastNote ? lastNote.note.trim() : "";
+
+    // Multi antwoorden: wat helpt om weer door te gaan
+    const focusHelp = [];
+    for(const s of last){
+      const arr = (s.multi || {}).helptFocus;
+      if(Array.isArray(arr)) focusHelp.push(...arr.filter(x=>x && x !== "weet ik niet"));
+    }
+    const helpCount = {};
+    for(const h of focusHelp) helpCount[h] = (helpCount[h]||0) + 1;
+    const topHelp = Object.entries(helpCount).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>k);
+
+    const n = titleCase(name);
+    const sents = [];
+
+    if(places.length){
+      sents.push(`${n} zie ik regelmatig bij ${places.join(" en ")}.`);
+    }else{
+      sents.push(`${n} laat in spel verschillende interesses zien.`);
     }
 
-    const aInit = avgScore(dims.initiatief);
-    const aVol = avgScore(dims.volhouden);
-    const aSamen = avgScore(dims.samenspel);
-    const aTaal = avgScore(dims.taal);
-    const aAfs = avgScore(dims.afspraken);
-    const aFocus = avgScore(dims.focus);
-    const aAfleiding = avgScore(dims.afleiding);
+    // Initiatief
+    if(init === "mostly") sents.push(`${n} start meestal zelf en kiest gericht, daar mogen we trots op zijn.`);
+    if(init === "often") sents.push(`${n} kiest vaak zelf een spel en start zelfstandig, daar mogen we trots op zijn.`);
+    if(init === "sometimes") sents.push(`${n} start soms zelf, en soms helpt een klein zetje.`);
+    if(init === "rarely") sents.push(`${n} start zelden uit zichzelf, dan is begeleiding helpend.`);
+    if(init === "notyet") sents.push(`${n} heeft nog steun nodig om te kiezen en te starten.`);
+    if(init === "unknown") sents.push(`Over het starten met spel heb ik nog te weinig gezien om iets zekers te zeggen.`);
 
-    const places = mostSeenPlaces(last);
-    const placeLine = places.length
-      ? `${titleCase(name)} is de laatste periode vaak te zien bij ${places.join(" en ")}.`
-      : `${titleCase(name)} laat in het spel verschillende interesses zien.`;
+    // Volhouden
+    if(vol === "mostly") sents.push(`${n} blijft meestal bij een spelidee en maakt het af, zo knap om te zien.`);
+    if(vol === "often") sents.push(`${n} blijft geregeld bij een spelidee en maakt het af, zo knap om te zien.`);
+    if(vol === "sometimes") sents.push(`${n} houdt een spelidee soms even vast, daarna wisselt het nog weleens.`);
+    if(vol === "rarely") sents.push(`${n} blijft zelden lang bij één spel, langer doorgaan komt nog rustig op gang.`);
+    if(vol === "notyet") sents.push(`${n} wisselt nog snel van spel, langer doorgaan is nog in ontwikkeling.`);
 
-    const initLine = `${titleCase(name)} ${phraseForAvg(aInit)} zelfstandig start en keuzes maakt binnen spel en werk.`;
-    const volLine = `${titleCase(name)} ${phraseForAvg(aVol)} een spelidee of taak een tijdje volhoudt.`;
-    const samenLine = `${titleCase(name)} ${phraseForAvg(aSamen)} samen speelt en contact maakt met anderen.`;
-    const taalLine = `${titleCase(name)} ${phraseForAvg(aTaal)} taal gebruikt om mee te doen en het spel of werk vorm te geven.`;
-    const afsLine = `${titleCase(name)} ${phraseForAvg(aAfs)} afspraken volgt, zoals delen, wachten en opruimen.`;
+    // Samen
+    if(samen === "mostly") sents.push(`${n} speelt meestal samen en zoekt contact met andere kinderen.`);
+    if(samen === "often") sents.push(`${n} speelt regelmatig samen en zoekt contact met andere kinderen.`);
+    if(samen === "sometimes") sents.push(`${n} speelt soms samen, en speelt ook graag even alleen of naast anderen.`);
+    if(samen === "rarely") sents.push(`${n} speelt zelden samen, naast elkaar spelen past nu beter.`);
+    if(samen === "notyet") sents.push(`${n} speelt nu vooral alleen of naast anderen, samen afstemmen is nog lastig.`);
 
-    let focusBlock = "";
-    const sawWork = last.some(s=>s.place === "werkjes");
+    // Taal
+    if(taal === "mostly") sents.push(`${n} gebruikt meestal woorden om mee te doen en het spel te sturen.`);
+    if(taal === "often") sents.push(`${n} gebruikt woorden om het spel mee te sturen en mee te doen.`);
+    if(taal === "sometimes") sents.push(`${n} gebruikt soms woorden in het spel, en laat ook veel zien met doen en aanwijzen.`);
+    if(taal === "rarely") sents.push(`${n} gebruikt zelden woorden in het spel, en laat vooral met doen zien wat hij of zij bedoelt.`);
+    if(taal === "notyet") sents.push(`${n} laat vooral met doen zien wat hij of zij bedoelt, woorden in het spel komen nog op gang.`);
+
+    // Afspraken
+    if(afs === "mostly") sents.push(`${n} houdt meestal afspraken vast, zoals delen, wachten en opruimen.`);
+    if(afs === "often") sents.push(`${n} houdt zich meestal aan afspraken, zoals delen, wachten en opruimen.`);
+    if(afs === "sometimes") sents.push(`${n} houdt afspraken soms goed vast, soms is er nog herinnering nodig.`);
+    if(afs === "rarely") sents.push(`${n} houdt afspraken zelden vanzelf vast, dan helpt nabijheid.`);
+    if(afs === "notyet") sents.push(`${n} heeft nog begeleiding nodig bij afspraken, zoals wachten en delen.`);
+
+    // Plek hints
+    if(rol === "mostly" || rol === "often") sents.push(`In de woonhoek zie ik dat ${n} een rol pakt en die even volhoudt.`);
+    if(bouw === "mostly" || bouw === "often") sents.push(`In de bouwhoek zie ik dat ${n} bouwt met een idee en zoekt naar oplossingen als iets niet lukt.`);
+
+    // Werkjes, focus
+    const sawWork = last.some(s => s.place === "werkjes");
     if(sawWork){
-      const focusPhrase = phraseForAvg(aFocus);
-      let extra = "";
-      if(aAfleiding !== null){
-        if(aAfleiding >= 1.2) extra = "Afleiding lijkt dan minder op de voorgrond te staan.";
-        else if(aAfleiding >= 0.7) extra = "Soms is er afleiding, dan helpt het om de taak kort en duidelijk te houden.";
-        else extra = "Bij werkjes is afleiding nog zichtbaar, dan helpt een rustige plek en een helder stapje voor stapje plan.";
+      if(focus === "mostly" || focus === "often") sents.push(`Bij werkjes uit de kast blijft ${n} meestal met aandacht bezig, dat gaat steeds meer vanzelf.`);
+      if(focus === "sometimes") sents.push(`Bij werkjes uit de kast lukt focus soms goed, en soms is er wat afleiding.`);
+      if(focus === "rarely" || focus === "notyet") sents.push(`Bij werkjes uit de kast raakt ${n} nog snel afgeleid, dan helpt korte begeleiding.`);
+
+      if(afleiding === "mostly" || afleiding === "often") sents.push(`Ik zie dan ook weleens rondlopen of kletsen tussendoor.`);
+      if(topHelp.length){
+        sents.push(`Wat helpt is bijvoorbeeld: ${topHelp.join(" en ")}.`);
       }
-      focusBlock = `${titleCase(name)} ${focusPhrase} met aandacht bij werkjes uit de kast blijft. ${extra}`.trim();
     }
 
-    const growthCandidates = [
-      { key:"initiatief", avg:aInit, label:"zelfstandig starten en kiezen" },
-      { key:"volhouden", avg:aVol, label:"langer bij een spel of taak blijven" },
-      { key:"samenspel", avg:aSamen, label:"samen spelen en afstemmen" },
-      { key:"taal", avg:aTaal, label:"taal gebruiken in spel" },
-      { key:"afspraken", avg:aAfs, label:"afspraken volgen" },
-      { key:"focus", avg:aFocus, label:"focus houden bij een taak" }
-    ].filter(x=>x.avg !== null);
+    if(noteText){
+      sents.push(`Ik zag bijvoorbeeld: ${noteText}`);
+    }
 
-    growthCandidates.sort((a,b)=>a.avg-b.avg);
-    const growth = growthCandidates[0];
+    return sents;
+  }
 
-    const growthLine = growth
-      ? `Een volgende stap die nu mooi past: ${growth.label}, zodat spel en werk nog makkelijker doorlopen.`
-      : `Een volgende stap volgt vanzelf als er meer observaties zijn opgeslagen.`;
+  function buildReportOptions(name){
+    const sessions = studentSessions(name);
+    const total = sessions.length;
+    const n = titleCase(name);
 
-    const noteLine = lastNotes.length
-      ? `Opvallend uit recente observaties: ${lastNotes.slice(-1)[0]}`
-      : "";
+    if(!total){
+      const t1 = `Voor ${n} heb ik nog geen observaties opgeslagen.`;
+      const t2 = `Ik heb nog geen spelobservaties genoteerd voor ${n}. Na een korte observatie kan ik hier een passende tekst van maken.`;
+      const t3 = `Voor ${n} is er nog geen observatie ingevuld. Zodra dat gebeurt, kan ik drie korte ouderteksten maken op basis van wat ik echt gezien heb.`;
+      return [t1, t2, t3].map(t => limitWords(t, 80));
+    }
 
-    const lines = [
-      placeLine,
-      initLine,
-      volLine,
-      samenLine,
-      taalLine,
-      afsLine,
-      focusBlock,
-      noteLine,
-      growthLine
-    ].filter(Boolean);
+    const sents = buildPlaySentences(name, sessions);
 
-    return lines.join("\n\n");
+    // Optie 1: kort en warm
+    const opt1 = [
+      sents[0],
+      sents.find(x=>x.includes("trots")) || sents[1] || "",
+      sents.find(x=>x.includes("speelt")) || sents.find(x=>x.includes("samen")) || ""
+    ].filter(Boolean).join(" ");
+
+    // Optie 2: iets vollediger, nog steeds rustig
+    const opt2 = [
+      sents[0],
+      sents[1] || "",
+      sents.find(x=>x.includes("blijft")) || "",
+      sents.find(x=>x.includes("afspraken")) || "",
+      sents.find(x=>x.startsWith("Ik zag bijvoorbeeld")) || ""
+    ].filter(Boolean).join(" ");
+
+    // Optie 3: beschrijvend met zachte volgende stap
+    const improvement = (() => {
+      const candidates = sents.filter(x =>
+        x.includes("nog steun nodig") ||
+        x.includes("nog in ontwikkeling") ||
+        x.includes("nog snel afgeleid") ||
+        x.includes("zelden") ||
+        x.includes("soms helpt")
+      );
+      if(!candidates.length) return `We zijn trots op deze groei, en bouwen hier rustig op verder.`;
+      return `${candidates[0]} We pakken dat stap voor stap aan, zodat spel en werk fijn doorlopen.`;
+    })();
+
+    const opt3 = [
+      sents[0],
+      sents[1] || "",
+      sents.find(x=>x.includes("woorden")) || sents.find(x=>x.includes("taal")) || "",
+      sents.find(x=>x.includes("werkjes uit de kast")) || "",
+      sents.find(x=>x.startsWith("Wat helpt is bijvoorbeeld")) || "",
+      improvement
+    ].filter(Boolean).join(" ");
+
+    return [
+      limitWords(opt1, 80),
+      limitWords(opt2, 80),
+      limitWords(opt3, 80)
+    ];
   }
 
   function saveSession(){
@@ -643,8 +711,14 @@
   }
 
   function showReport(){
-    const text = buildReportText(currentStudent);
+    const opts = buildReportOptions(currentStudent);
     $("reportTitle").textContent = titleCase(currentStudent);
+
+    const text =
+      `Optie 1\n${opts[0]}\n\n` +
+      `Optie 2\n${opts[1]}\n\n` +
+      `Optie 3\n${opts[2]}`;
+
     $("reportText").textContent = text;
 
     $("reportCard").style.display = "block";
@@ -662,16 +736,18 @@
     if(!sessions.length){
       host.innerHTML = `<div class="small">Nog geen observaties opgeslagen</div>`;
     }else{
-      sessions.forEach((s, idx)=>{
+      sessions.forEach((s)=>{
         const p = PLACES.find(x=>x.id===s.place);
         const el = document.createElement("div");
         el.className = "session";
+
         const title = document.createElement("h4");
         title.textContent = `${fmtDate(s.at)}, ${p ? p.label : s.place}`;
-        const info = document.createElement("p");
 
-        const known = Object.values(s.answers||{}).filter(x=>x && x !== "weet ik niet").length;
-        const unknown = Object.values(s.answers||{}).filter(x=>x === "weet ik niet").length;
+        const info = document.createElement("p");
+        const ans = Object.values(s.answers||{});
+        const known = ans.filter(x=>x && x !== "weet ik niet").length;
+        const unknown = ans.filter(x=>x === "weet ik niet").length;
         const note = s.note && s.note.trim() ? `Notitie: ${s.note.trim()}` : "";
         info.textContent = `${known} antwoorden, ${unknown} keer weet ik niet. ${note}`.trim();
 
@@ -681,9 +757,9 @@
         del.textContent = "Verwijder deze observatie";
         del.onclick = ()=>{
           const list = studentSessions(currentStudent);
-          const originalIndex = list.findIndex(x=>x.at===s.at && x.place===s.place);
-          if(originalIndex >= 0){
-            list.splice(originalIndex,1);
+          const idx = list.findIndex(x=>x.at===s.at && x.place===s.place);
+          if(idx >= 0){
+            list.splice(idx,1);
             save(data);
             toast("Observatie verwijderd");
             showOverview();
@@ -747,10 +823,6 @@
   }
 
   function init(){
-    if("serviceWorker" in navigator){
-      navigator.serviceWorker.register("./sw.js").catch(()=>{});
-    }
-
     renderPlaceButtons();
     renderStudentSelect();
     showPlaces();
@@ -758,8 +830,6 @@
     $("studentSelect").addEventListener("change", (e)=>{
       currentStudent = e.target.value;
       renderStudentSelect();
-      $("reportCard").style.display = "none";
-      $("overviewCard").style.display = "none";
       showPlaces();
     });
 
