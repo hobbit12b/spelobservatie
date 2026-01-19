@@ -14,10 +14,7 @@
       --radius: 18px;
       --good: rgba(34,197,94,.14);
       --goodLine: rgba(34,197,94,.55);
-      --warn: rgba(245,158,11,.14);
-      --warnLine: rgba(245,158,11,.55);
       --bad: rgba(239,68,68,.14);
-      --badLine: rgba(239,68,68,.55);
       --line: rgba(255,255,255,.09);
     }
     *{box-sizing:border-box}
@@ -107,6 +104,7 @@
       padding: 10px 10px;
       font-weight: 800;
       letter-spacing: .02em;
+      white-space: nowrap;
     }
     .optLetters button.on{
       border-color: var(--goodLine);
@@ -241,12 +239,12 @@
       <div class="hr"></div>
       <div class="small">Legenda antwoorden</div>
       <div class="legend" aria-label="Legenda">
-        <div class="chip"><b>A</b> altijd</div>
-        <div class="chip"><b>V</b> vaak</div>
-        <div class="chip"><b>S</b> soms</div>
-        <div class="chip"><b>Z</b> zelden</div>
-        <div class="chip"><b>N</b> nee</div>
         <div class="chip"><b>?</b> weet ik niet</div>
+        <div class="chip"><b>Nooit</b> nooit</div>
+        <div class="chip"><b>Soms</b> soms</div>
+        <div class="chip"><b>Meestal</b> meestal</div>
+        <div class="chip"><b>Vaak</b> vaak</div>
+        <div class="chip"><b>Altijd</b> altijd</div>
       </div>
     </div>
 
@@ -254,11 +252,11 @@
       <div class="row" style="align-items:center;">
         <div>
           <div class="small">Leerling</div>
-          <div id="whoNow" style="font-size:16px; font-weight:800;"></div>
+          <div id="whoNow" style="font-size:16px; font-weight:900;"></div>
         </div>
         <div style="text-align:right;">
           <div class="small">Plek</div>
-          <div id="placeNow" style="font-size:16px; font-weight:800;"></div>
+          <div id="placeNow" style="font-size:16px; font-weight:900;"></div>
         </div>
       </div>
       <div class="hr"></div>
@@ -339,13 +337,15 @@
     { id:"werkjes", label:"Werkjes uit de kast" }
   ];
 
+  // Gewenste volgorde: ?, Nooit, Soms, Meestal, Vaak, Altijd
+  // Knoptekst schakelt automatisch tussen lang en kort
   const SCALE = [
-    { key:"altijd", letter:"A", label:"altijd" },
-    { key:"vaak", letter:"V", label:"vaak" },
-    { key:"soms", letter:"S", label:"soms" },
-    { key:"zelden", letter:"Z", label:"zelden" },
-    { key:"nee", letter:"N", label:"nee" },
-    { key:"?", letter:"?", label:"weet ik niet" }
+    { key:"?",      label:"?",      short:"?" },
+    { key:"nooit",  label:"Nooit",  short:"No" },
+    { key:"soms",   label:"Soms",   short:"S"  },
+    { key:"meestal",label:"Meestal",short:"M"  },
+    { key:"vaak",   label:"Vaak",   short:"V"  },
+    { key:"altijd", label:"Altijd", short:"A"  }
   ];
 
   const BASE_QUESTIONS = [
@@ -388,7 +388,7 @@
     ]
   };
 
-  const STORAGE_KEY = "spelObservatiesV5";
+  const STORAGE_KEY = "spelObservatiesV6";
   const $ = (id) => document.getElementById(id);
 
   function nowISO(){ return new Date().toISOString(); }
@@ -415,16 +415,26 @@
     return obj;
   }
 
+  // Als er genoeg ruimte is: volledige woorden, anders korte labels
+  function useLongScaleLabels(){
+    // A53 is meestal breed genoeg, maar in smalle weergave korter
+    return window.innerWidth >= 430;
+  }
+  function scaleBtnText(o){
+    if(o.key === "?") return "?";
+    return useLongScaleLabels() ? o.label : o.short;
+  }
+
   function load(){
     const raw = localStorage.getItem(STORAGE_KEY);
     if(raw){
       try{ return JSON.parse(raw); }catch(e){}
     }
-    const fresh = { version:5, students:{} };
+    const fresh = { version:6, students:{} };
     for(const s of STUDENTS){
       fresh.students[s] = {
-        sessions:[],   // ALLE observaties met datum
-        agg:{          // tellerlaag opgebouwd uit sessions
+        sessions:[],
+        agg:{
           updatedAt:null,
           lastPlace:null,
           stats:{},
@@ -515,8 +525,8 @@
 
         for(const o of SCALE){
           const btn = document.createElement("button");
-          btn.textContent = o.letter;
-          btn.title = o.label;
+          btn.textContent = scaleBtnText(o);
+          btn.title = o.key === "?" ? "weet ik niet" : o.label.toLowerCase();
           btn.className = (draftAnswers[q.id] === o.key) ? "on" : "";
           btn.onclick = ()=>{
             draftAnswers[q.id] = o.key;
@@ -528,7 +538,7 @@
 
         const hint = document.createElement("div");
         hint.className = "small";
-        hint.textContent = "Tik een letter";
+        hint.textContent = "Kies een optie";
         box.appendChild(hint);
       }
 
@@ -571,7 +581,7 @@
 
         const hint = document.createElement("div");
         hint.className = "small";
-        hint.textContent = "Je kunt meerdere opties kiezen, druk op ? als je het niet weet";
+        hint.textContent = "Meerdere keuzes mogelijk, gebruik ? als je het niet weet";
         box.appendChild(hint);
       }
 
@@ -627,7 +637,7 @@
     if(!sessions.length){
       host.innerHTML = `<div class="small">Nog geen observaties opgeslagen</div>`;
     }else{
-      sessions.forEach((s, idx)=>{
+      sessions.forEach((s)=>{
         const placeLabel = PLACES.find(x=>x.id===s.place)?.label || s.place;
 
         const el = document.createElement("div");
@@ -670,9 +680,9 @@
           if(q.type === "scale"){
             const val = (s.answers || {})[q.id];
             if(!val) continue;
-            const letter = SCALE.find(x=>x.key===val)?.letter || val;
+            const show = val === "?" ? "?" : (SCALE.find(x=>x.key===val)?.label || val);
             kv.appendChild(document.createElement("div")).textContent = q.text;
-            kv.appendChild(document.createElement("div")).textContent = letter;
+            kv.appendChild(document.createElement("div")).textContent = show;
           }
           if(q.type === "multi"){
             const arr = (s.multi || {})[q.id];
@@ -764,9 +774,9 @@
     const st = student(currentStudent);
     st.sessions.push(session);
 
-    // Agg bijwerken op basis van deze nieuwe sessie
     st.agg.updatedAt = session.at;
     st.agg.lastPlace = placeId;
+
     for(const [qid, key] of Object.entries(session.answers || {})){
       if(!key) continue;
       updateStats(st.agg.stats, qid, key);
@@ -808,7 +818,6 @@
         if(!obj || !obj.students) throw new Error("Geen geldige data");
         data = obj;
 
-        // safety, ensure structure
         for(const k of Object.keys(data.students)){
           ensureStudent(k);
           rebuildAgg(k);
@@ -838,10 +847,9 @@
     showOverview();
   }
 
-  // Rapport analyse
   function freqLabelFromStats(stats){
     if(!stats || !stats.total) return null;
-    const keys = ["altijd","vaak","soms","zelden","nee"];
+    const keys = ["nooit","soms","meestal","vaak","altijd"]; // ? telt niet mee
     let best = null;
     let bestCount = -1;
     for(const k of keys){
@@ -895,6 +903,10 @@
       statements.push({ key:"place", text:`Ik zie ${n} regelmatig bij ${places.join(" en ")}.`, reason:"Interesse", suggested:true });
     }
 
+    const isHigh = (f)=> (f === "altijd" || f === "vaak" || f === "meestal");
+    const isMid = (f)=> (f === "soms");
+    const isLow = (f)=> (f === "nooit");
+
     const core = [
       { q:"start", good:`${n} kiest vaak zelf een spel of werkje en start zelfstandig. Daar mogen we trots op zijn.`, mid:`${n} start soms zelf, en soms helpt een klein zetje.`, low:`${n} heeft nog hulp nodig om te kiezen en te starten.`, reason:"Starten", suggested:true },
       { q:"volhouden", good:`${n} blijft vaak bij een spel of taak en maakt het af. Zo knap om te zien.`, mid:`${n} houdt een spel of taak soms even vast, daarna wisselt het nog weleens.`, low:`${n} wisselt nog snel. Langer doorgaan komt stapje voor stapje.`, reason:"Volhouden", suggested:true },
@@ -906,40 +918,41 @@
     for(const c of core){
       const f = freqLabelFromStats(agg.stats?.[c.q]);
       if(!f) continue;
-      if(f === "altijd" || f === "vaak"){
+      if(isHigh(f)){
         statements.push({ key:`${c.q}_good`, text:c.good, reason:c.reason, suggested:true });
-      }else if(f === "soms"){
+      }else if(isMid(f)){
         statements.push({ key:`${c.q}_mid`, text:c.mid, reason:c.reason, suggested:true });
-      }else{
+      }else if(isLow(f)){
         statements.push({ key:`${c.q}_low`, text:c.low, reason:c.reason, suggested:false });
       }
     }
 
     const rolF = freqLabelFromStats(agg.stats?.rol);
-    if(rolF === "altijd" || rolF === "vaak"){
+    if(isHigh(rolF)){
       statements.push({ key:"rol", text:`In de woonhoek zie ik dat ${n} een rol pakt en die even volhoudt.`, reason:"Woonhoek", suggested:false });
     }
     const bouwF = freqLabelFromStats(agg.stats?.bouwenPlan);
-    if(bouwF === "altijd" || bouwF === "vaak"){
+    if(isHigh(bouwF)){
       statements.push({ key:"bouw", text:`In de bouwhoek zie ik dat ${n} bouwt met een idee en dingen probeert als iets niet lukt.`, reason:"Bouwhoek", suggested:false });
     }
 
     const focusF = freqLabelFromStats(agg.stats?.focus);
     if(focusF){
-      if(focusF === "altijd" || focusF === "vaak"){
+      if(isHigh(focusF)){
         statements.push({ key:"focus_good", text:`Bij werkjes uit de kast blijft ${n} vaak met aandacht bezig. Dat gaat steeds meer vanzelf.`, reason:"Focus", suggested:true });
-      }else if(focusF === "soms"){
+      }else if(isMid(focusF)){
         statements.push({ key:"focus_mid", text:`Bij werkjes uit de kast lukt focus soms goed, en soms is er wat afleiding.`, reason:"Focus", suggested:true });
-      }else{
+      }else if(isLow(focusF)){
         statements.push({ key:"focus_low", text:`Bij werkjes uit de kast is focus nog lastig. Dan helpt korte begeleiding.`, reason:"Focus", suggested:false });
       }
     }
 
+    // Afleiding items, hier betekent hoog dat het vaker voorkomt
     const aflF = freqLabelFromStats(agg.stats?.afgeleid);
     if(aflF){
-      if(aflF === "altijd" || aflF === "vaak"){
+      if(isHigh(aflF)){
         statements.push({ key:"afl_high", text:`Tijdens werkjes zie ik regelmatig afleiding, zoals rondlopen of kletsen tussendoor.`, reason:"Afleiding", suggested:true });
-      }else if(aflF === "soms"){
+      }else if(isMid(aflF)){
         statements.push({ key:"afl_mid", text:`Tijdens werkjes is er soms afleiding, dan helpt een klein seintje.`, reason:"Afleiding", suggested:false });
       }
     }
@@ -960,33 +973,6 @@
       if(ln[1]){
         statements.push({ key:"note2", text:`Een ander moment viel op: ${ln[1].text}`, reason:`Notitie ${fmtDate(ln[1].at)}`, suggested:false });
       }
-    }
-
-    // Volgende stap op basis van minst gekozen positieve frequentie
-    const rank = { altijd:4, vaak:3, soms:2, zelden:1, nee:0 };
-    const candidates = ["start","volhouden","samen","taal","afspraken"]
-      .map(q=>{
-        const f = freqLabelFromStats(agg.stats?.[q]);
-        return { q, f, score: f ? rank[f] : null };
-      })
-      .filter(x=>x.score !== null);
-
-    if(candidates.length){
-      candidates.sort((a,b)=>a.score-b.score);
-      const g = candidates[0].q;
-      const labelMap = {
-        start:"starten en kiezen",
-        volhouden:"volhouden",
-        samen:"samen spelen",
-        taal:"woorden gebruiken in spel",
-        afspraken:"afspraken vasthouden"
-      };
-      statements.push({
-        key:"next",
-        text:`Een volgende stap die nu goed past: ${labelMap[g]}. We oefenen dat rustig door in de klas.`,
-        reason:"Volgende stap",
-        suggested:true
-      });
     }
 
     if(!statements.length){
@@ -1059,42 +1045,20 @@
     const starred = all.filter(x => pr.starred && pr.starred[x.key]);
     const chosen = starred.length ? starred : all.slice(0, 7);
 
-    const order = [
-      "place",
-      "start_good","start_mid","start_low",
-      "volhouden_good","volhouden_mid","volhouden_low",
-      "samen_good","samen_mid","samen_low",
-      "taal_good","taal_mid","taal_low",
-      "afspraken_good","afspraken_mid","afspraken_low",
-      "rol","bouw",
-      "focus_good","focus_mid","focus_low",
-      "afl_high","afl_mid","cause","help",
-      "note","note2",
-      "next"
-    ];
+    const order = ["place","start_good","start_mid","start_low","volhouden_good","volhouden_mid","volhouden_low","samen_good","samen_mid","samen_low","taal_good","taal_mid","taal_low","afspraken_good","afspraken_mid","afspraken_low","rol","bouw","focus_good","focus_mid","focus_low","afl_high","afl_mid","cause","help","note","note2"];
     const idxOf = (k)=> {
       const i = order.indexOf(k);
       return i === -1 ? 999 : i;
     };
     chosen.sort((a,b)=> idxOf(a.key) - idxOf(b.key));
 
-    // Optie 1: warm en compact, nadruk op basis
     const o1 = [];
-    const prefer1 = ["place","start_good","volhouden_good","samen_good","taal_good","afspraken_good","note"];
-    for(const k of prefer1){
-      const it = chosen.find(x=>x.key===k);
-      if(it && !o1.includes(it.text)) o1.push(it.text);
+    for(const it of chosen){
       if(o1.length >= 6) break;
-    }
-    if(o1.length < 4){
-      for(const it of chosen){
-        if(o1.length >= 6) break;
-        if(!o1.includes(it.text)) o1.push(it.text);
-      }
+      if(!o1.includes(it.text)) o1.push(it.text);
     }
     const t1 = o1.join(" ");
 
-    // Optie 2: vollediger en beschrijvend
     const o2 = [];
     for(const it of chosen){
       if(o2.length >= 10) break;
@@ -1102,14 +1066,11 @@
     }
     const t2 = o2.join(" ");
 
-    // Optie 3: compleet, inclusief wat helpt en volgende stap
     const o3 = [];
     for(const it of chosen){
       if(o3.length >= 12) break;
       o3.push(it.text);
     }
-    const next = chosen.find(x=>x.key==="next");
-    if(next && !o3.includes(next.text)) o3.push(next.text);
     const t3 = o3.join(" ");
 
     $("reportText").textContent =
@@ -1139,6 +1100,12 @@
     renderPlaceButtons();
     renderStudentSelect();
     showPlaces();
+
+    window.addEventListener("resize", ()=>{
+      if($("questionsCard").style.display !== "none" && currentPlace){
+        renderQuestions(currentPlace);
+      }
+    });
 
     $("studentSelect").addEventListener("change", (e)=>{
       currentStudent = e.target.value;
@@ -1179,6 +1146,57 @@
       if(f) importData(f);
       e.target.value = "";
     });
+  }
+
+  // Export, import en delete functies
+  function exportData(){
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `spelobservaties_klas_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("Export gedownload");
+  }
+
+  function importData(file){
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const obj = JSON.parse(reader.result);
+        if(!obj || !obj.students) throw new Error("Geen geldige data");
+        data = obj;
+
+        for(const k of Object.keys(data.students)){
+          ensureStudent(k);
+          rebuildAgg(k);
+        }
+        save(data);
+
+        currentStudent = Object.keys(data.students)[0] || STUDENTS[0];
+        renderStudentSelect();
+        toast("Import gelukt");
+        showPlaces();
+      }catch(e){
+        toast("Import mislukt");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function deleteStudent(){
+    if(!confirm(`Weet je zeker dat je alle data van ${titleCase(currentStudent)} wilt verwijderen`)) return;
+    ensureStudent(currentStudent);
+    data.students[currentStudent].sessions = [];
+    data.students[currentStudent].agg = { updatedAt:null, lastPlace:null, stats:{}, multiStats:{} };
+    data.students[currentStudent].prefs = { starred:{}, customStatements:[] };
+    save(data);
+    toast("Data verwijderd");
+    renderStudentSelect();
+    showOverview();
   }
 
   init();
